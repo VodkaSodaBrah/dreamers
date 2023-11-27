@@ -44,8 +44,44 @@ clf = Pipeline(steps=[('preprocessor', preprocessor),
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42)
 
-# Fit the model on training data and make predictions on test data
+# Fit the model on training data
 clf.fit(X_train, y_train)
+
+# Predictions will be made later, for now let's focus on plotting the regression line
+# Extract the feature for the x-axis (assuming there's only one feature for simplicity)
+x_feature = numeric_features[0] if len(numeric_features) > 0 else None
+
+# Scale the feature values like the training data
+x_values_scaled = None
+if x_feature is not None:
+    # Scale the entire dataset's feature for plotting purposes
+    x_values_scaled = clf.named_steps['preprocessor'].transform(
+        X[[x_feature]]).flatten()
+    # We also need the y-values for the scaled x_values to plot the regression line
+    y_line = clf.predict(X[[x_feature]])
+
+# Generate plot using Plotly
+fig = go.Figure()
+
+# Add scatter plot for raw data
+fig.add_trace(go.Scatter(x=x_values_scaled, y=y,
+              mode='markers', name='Raw Data'))
+
+# Add the regression line to the plot
+if x_feature is not None:
+    fig.add_trace(go.Scatter(x=x_values_scaled, y=y_line,
+                  mode='lines', name='Regression Line'))
+
+# Set labels and title
+fig.update_layout(title='Linear Regression Plot',
+                  xaxis_title='Scaled Feature Values',
+                  yaxis_title='Target Values')
+
+# Show the plot
+fig.show()
+
+# Now let's calculate the accuracy and mean squared error
+# First, make predictions on test data
 y_pred = clf.predict(X_test)
 
 # Convert linear regression predictions to binary for classification
@@ -67,22 +103,3 @@ else:
 
 # Calculate mean squared error
 print(f'Mean Squared Error: {mean_squared_error(y_test, y_pred)}')
-
-# For simplicity, let's assume X has only one feature for plotting.
-# Extract the values of that feature for the x-axis
-x_values = X[numeric_features[0]].values if len(numeric_features) > 0 else None
-
-# Generate plot using Plotly for the raw data
-fig = go.Figure()
-
-# Add scatter plot for raw data
-if x_values is not None:
-    fig.add_trace(go.Scatter(x=x_values, y=y, mode='markers', name='Raw Data'))
-
-# Set labels and title
-fig.update_layout(title='Raw Data Visualization',
-                  xaxis_title='Feature Values',
-                  yaxis_title='Target Values')
-
-# Show the plot
-fig.show()
