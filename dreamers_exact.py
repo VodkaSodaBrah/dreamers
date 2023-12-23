@@ -5,7 +5,7 @@ import plotly.graph_objs as go
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -47,6 +47,14 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Fit the model on training data
 clf.fit(X_train, y_train)
 
+# Get the coefficients and intercept
+intercept = clf.named_steps['regressor'].intercept_
+coefficients = clf.named_steps['regressor'].coef_
+
+# Print the coefficients
+print(f"Intercept (β0): {intercept}")
+print(f"Coefficients (β1, β2, ..., βn): {coefficients}")
+
 # Predictions will be made later, for now let's focus on plotting the regression line
 # Extract the feature for the x-axis (assuming there's only one feature for simplicity)
 x_feature = numeric_features[0] if len(numeric_features) > 0 else None
@@ -80,26 +88,14 @@ fig.update_layout(title='Linear Regression Plot',
 # Show the plot
 fig.show()
 
-# Now let's calculate the accuracy and mean squared error
+# Now let's calculate the mean squared error and R-squared
 # First, make predictions on test data
 y_pred = clf.predict(X_test)
 
-# Convert linear regression predictions to binary for classification
-binary_predictions = [1 if val >= 0.5 else 0 for val in y_pred]
-y_test_binary = [1 if val >= 0.5 else 0 for val in y_test]
-
-# Calculate accuracy
-accuracy = accuracy_score(y_test_binary, binary_predictions)
-
-# Print the results
-if accuracy > 0.5:
-    print(
-        f"Model's accuracy of {accuracy*100:.2f}% is better than random guessing.")
-elif accuracy == 0.5:
-    print("Model's accuracy is equivalent to random guessing.")
-else:
-    print(
-        f"Model's accuracy of {accuracy*100:.2f}% is worse than random guessing.")
-
 # Calculate mean squared error
-print(f'Mean Squared Error: {mean_squared_error(y_test, y_pred)}')
+mse = mean_squared_error(y_test, y_pred)
+print(f'Mean Squared Error: {mse:.2f}')
+
+# Calculate R-squared
+r2 = r2_score(y_test, y_pred)
+print(f'R-squared: {r2:.2f}')
