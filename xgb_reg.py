@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -89,3 +90,15 @@ print(f'Recall: {recall:.2f}')
 print(f'F1 Score: {f1:.2f}')
 print('Confusion Matrix:')
 print(cm)
+
+# Plotting the actual vs predicted results
+plt.figure(figsize=(10, 6))
+plt.scatter(range(len(y_test)), y_test,
+            color='blue', label='Actual', alpha=0.5)
+plt.scatter(range(len(y_pred)), y_pred, color='red',
+            label='Predicted', alpha=0.5)
+plt.title('Actual vs Predicted Results')
+plt.xlabel('Samples')
+plt.ylabel('Binary Classification Results')
+plt.legend()
+plt.show()
