@@ -1,7 +1,7 @@
 # Importing necessary libraries
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
+import plotly.graph_objs as go
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
@@ -14,7 +14,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 dreamers_sample = pd.read_csv(
     '/Users/mchildress/Code/dreamers/synthetic_time_series.csv')
 
-# Assuming 'y' is your target variable and 'x' is your feature.
+# Assuming 'y' is your target variable and 'x' is your feature
 X = dreamers_sample.drop('y', axis=1)
 y = dreamers_sample['y']
 
