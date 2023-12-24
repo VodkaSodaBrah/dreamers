@@ -106,6 +106,16 @@ print(f'F1 Score: {f1:.2f}')
 print('Confusion Matrix:')
 print(cm)
 
+# Plot the original data
+plt.figure(figsize=(12, 6))
+plt.scatter(data['x'], data['y'], alpha=0.5, label='Original Data')
+plt.title('Original Data Plot')
+plt.xlabel('x (Feature)')
+plt.ylabel('y (Target)')
+plt.legend()
+plt.savefig('original_data_plot.png')
+plt.close()
+
 # Plotting the actual vs predicted results
 plt.figure(figsize=(10, 6))
 plt.scatter(range(len(y_test)), y_test,
