@@ -1,11 +1,20 @@
+import os
+
+import lime
+import lime.lime_tabular
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import shap
 import xgboost as xgb
 from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
                              precision_score, recall_score)
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.preprocessing import StandardScaler
+
+os.chdir('/Users/mchildress/Code/dreamers')
+matplotlib.use('Agg')
 
 # Load the data
 file_path = '/Users/mchildress/Code/dreamers/synthetic_time_series.csv'
@@ -74,6 +83,12 @@ print("Best Score:", grid_search.best_score_)
 
 # Use the best estimator to make predictions
 best_model = grid_search.best_estimator_
+
+# Save the model in JSON format
+best_model = grid_search.best_estimator_
+best_model.save_model("best_model.json")
+
+# Make predictions
 y_pred = best_model.predict(X_test)
 
 # Calculate and print accuracy, precision, recall, and F1 score for the test set
@@ -102,3 +117,35 @@ plt.xlabel('Samples')
 plt.ylabel('Binary Classification Results')
 plt.legend()
 plt.show()
+
+# Initialize SHAP explainer
+explainer = shap.TreeExplainer(best_model)
+shap_values = explainer.shap_values(X_train)
+
+# SHAP summary plot
+shap.summary_plot(shap_values, X_train, feature_names=data.columns, show=False)
+plt.savefig("shap_summary_plot.png")
+plt.close()
+
+
+# Initialize LIME explainer with actual feature names
+explainer = lime.lime_tabular.LimeTabularExplainer(
+    training_data=X_train,
+    # List of actual feature names
+    feature_names=data.drop(['y', 'y_binary'], axis=1).columns.tolist(),
+    class_names=['class_0', 'class_1'],  # Adjust based on your target variable
+    mode='classification'
+)
+
+# Explain the prediction for a specific instance
+instance_index = 1  # Change as needed
+lime_exp = explainer.explain_instance(
+    X_test[instance_index],
+    best_model.predict_proba,
+    num_features=len(X.columns)
+)
+
+# Visualize the explanation
+fig = lime_exp.as_pyplot_figure()
+fig.savefig("lime_explanation.png")
+plt.close()
