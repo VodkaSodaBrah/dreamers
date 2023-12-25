@@ -37,8 +37,7 @@ data['rolling_mean'] = data['y'].rolling(window=window_size).mean()
 data['rolling_std'] = data['y'].rolling(window=window_size).std()
 
 # Fourier transformation to capture cyclical behavior
-# You will need to determine the period based on your specific data
-period = 12  # Placeholder for the actual period
+period = 12
 for k in range(1, 4):  # First few Fourier terms
     data[f'sin_{k}'] = np.sin(2 * np.pi * k * data['x'] / period)
     data[f'cos_{k}'] = np.cos(2 * np.pi * k * data['x'] / period)
@@ -138,14 +137,13 @@ plt.close()
 # Initialize LIME explainer with actual feature names
 explainer = lime.lime_tabular.LimeTabularExplainer(
     training_data=X_train,
-    # List of actual feature names
     feature_names=data.drop(['y', 'y_binary'], axis=1).columns.tolist(),
-    class_names=['class_0', 'class_1'],  # Adjust based on your target variable
+    class_names=['class_0', 'class_1'],
     mode='classification'
 )
 
 # Explain the prediction for a specific instance
-instance_index = 1  # Change as needed
+instance_index = 1
 lime_exp = explainer.explain_instance(
     X_test[instance_index],
     best_model.predict_proba,
