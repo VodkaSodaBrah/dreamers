@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import lime
 import lime.lime_tabular
@@ -13,6 +14,10 @@ from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.preprocessing import StandardScaler
 
+# Suppress deprecated binary model warning from XGBoost
+warnings.filterwarnings('ignore', category=UserWarning, module='xgboost')
+
+# Define the working directory
 os.chdir('/Users/mchildress/Code/dreamers/Analysis')
 matplotlib.use('Agg')
 
@@ -132,7 +137,6 @@ shap_values = explainer.shap_values(X_train)
 shap.summary_plot(shap_values, X_train, feature_names=data.columns, show=False)
 plt.savefig("shap_summary_plot.png")
 plt.close()
-
 
 # Initialize LIME explainer with actual feature names
 explainer = lime.lime_tabular.LimeTabularExplainer(
