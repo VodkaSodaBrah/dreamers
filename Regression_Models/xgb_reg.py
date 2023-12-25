@@ -38,7 +38,7 @@ data['rolling_std'] = data['y'].rolling(window=window_size).std()
 
 # Fourier transformation to capture cyclical behavior
 period = 12
-for k in range(1, 4):  # First few Fourier terms
+for k in range(1, 4):
     data[f'sin_{k}'] = np.sin(2 * np.pi * k * data['x'] / period)
     data[f'cos_{k}'] = np.cos(2 * np.pi * k * data['x'] / period)
 
