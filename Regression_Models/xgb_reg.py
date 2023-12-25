@@ -20,9 +20,6 @@ matplotlib.use('Agg')
 file_path = '/Users/mchildress/Code/dreamers/synthetic_time_series.csv'
 data = pd.read_csv(file_path)
 
-# Assuming 'x' is a time-based feature (like a timestamp), convert it if necessary
-# For this example, I'm treating 'x' as an ordinal time feature
-
 # Sort data by 'x' if it's time-related
 data = data.sort_values(by='x')
 
@@ -35,7 +32,7 @@ for lag in [1, 2, 3]:  # You can choose different lags
     data[f'lag_{lag}'] = data['y'].shift(lag)
 
 # Rolling window statistics
-window_size = 3  # You can choose different window sizes
+window_size = 3
 data['rolling_mean'] = data['y'].rolling(window=window_size).mean()
 data['rolling_std'] = data['y'].rolling(window=window_size).std()
 
