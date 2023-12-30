@@ -33,7 +33,7 @@ Installation
 Usage
 
 Run the main script:
-    python3 xgb_reg.py
+    python3 time_series_analysis.py
 
 Features
 Data Preprocessing: Includes standardization, lag features creation, and binary transformation based on median values.
