@@ -15,7 +15,7 @@ This repository contains code for analyzing and predicting time series data usin
 
 Ensure you have the following installed:
 
-- Python 3.11.4
+- Python 3.11.5
 - Pandas, NumPy, Matplotlib, XGBoost, scikit-learn, lime, shap
 
 You can install these packages using `pip`:
