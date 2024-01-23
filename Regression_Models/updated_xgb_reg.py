@@ -25,6 +25,12 @@ matplotlib.use('Agg')
 file_path = '/Users/mchildress/Code/dreamers/synthetic_time_series.csv'
 data = pd.read_csv(file_path)
 
+# Splitting the data into training and test sets
+X = data.drop('y', axis=1)  # Feature column
+y = data['y']  # Target column
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
+
 # Sort data by 'x' if it's time-related
 data = data.sort_values(by='x')
 
@@ -77,6 +83,11 @@ param_grid = {
 grid_search = GridSearchCV(
     estimator=model, param_grid=param_grid, scoring='accuracy', cv=3, verbose=1)
 grid_search.fit(X_train, y_train)
+
+# Evaluating the model on the test set
+y_pred = grid_search.predict(X_test)
+test_accuracy = accuracy_score(y_test, y_pred)
+print(f'Test Accuracy: {test_accuracy}')
 
 # Best parameters and best score
 print("Best Parameters:", grid_search.best_params_)
