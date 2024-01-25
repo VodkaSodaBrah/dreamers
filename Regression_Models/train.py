@@ -43,6 +43,7 @@ X_train, X_temp, y_train, y_temp = train_test_split(
 X_val, X_test, y_val, y_test = train_test_split(
     X_temp, y_temp, test_size=0.5, random_state=42)
 
+
 # Initialize the XGBoost classifier
 model = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss')
 
@@ -80,3 +81,8 @@ test_data.to_csv('test_data.csv', index=False)
 # Evaluate training performance
 train_performance = random_search.best_score_
 print("Best Cross-Validation Score from Randomized Search:", train_performance)
+
+# Print the size of each set
+print(f"Training set length: {len(X_train)}")
+print(f"Validation set length: {len(X_val)}")
+print(f"Test set length: {len(X_test)}")
