@@ -4,10 +4,10 @@ This repository contains code for analyzing and predicting time series data usin
 
 ## Project Structure
 
-- `time_series_analysis.py`: Main Python script with all the analysis and model training.
+- `train.py & test.py`: Main Python scripts with all the analysis and model training.
 - `synthetic_time_series.csv`: Sample dataset used for the analysis.
-- `/models`: Directory where trained models are saved.
-- `/plots`: Directory for saved plots and data visualizations.
+- `/Analysis`: Directory where trained models are saved.
+- `/Analysis`: Directory for saved plots and data visualizations.
 
 ## Getting Started
 
@@ -16,7 +16,7 @@ This repository contains code for analyzing and predicting time series data usin
 Ensure you have the following installed:
 
 - Python 3.11.5
-- Pandas, NumPy, Matplotlib, XGBoost, scikit-learn, lime, shap
+- Pandas, NumPy, Matplotlib, XGBoost, scikit-learn, lime, shap, joblib
 
 You can install these packages using `pip`:
 
@@ -33,7 +33,8 @@ Installation
 Usage
 
 Run the main script:
-    python3 time_series_analysis.py
+    python3 train.py
+        ensure the path to the sample dataset is set correctly
 
 Features
 Data Preprocessing: Includes standardization, lag features creation, and binary transformation based on median values.
