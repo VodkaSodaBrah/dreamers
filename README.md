@@ -37,7 +37,7 @@ Run the main script:
 
 Features
 Data Preprocessing: Includes standardization, lag features creation, and binary transformation based on median values.
-Model Training: Uses XGBoost for training a classifier with hyperparameter tuning through grid search.
+Model Training: Uses XGBoost for training a classifier with hyperparameter tuning through random search.
 Model Evaluation: Evaluates model performance using accuracy, precision, recall, and F1 score.
 Data Visualization: Generates plots for original data and prediction results.
 Explainability: Implements SHAP and LIME for model interpretation.
