@@ -49,7 +49,7 @@ License
 Distributed under the MIT License. See LICENSE for more information.
 
 Contact
-Michael Childress --- michael@michaelchildress.tech
+Michael Childress --- mchildress@me.com
 
 Project Link: https://https://github.com/VodkaSodaBrah/dreamers
 
