@@ -1,11 +1,11 @@
 import os
 import warnings
 
-import joblib
+import joblib  # For saving the model
 import numpy as np
 import pandas as pd
 import xgboost as xgb
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV, TimeSeriesSplit
 from sklearn.preprocessing import StandardScaler
 
 # Suppress warnings, set directory, etc.
@@ -20,71 +20,72 @@ data = data.sort_values(by='x')
 # Calculate the change from the previous step
 data['y_diff'] = data['y'].diff()
 data['y_binary'] = (data['y_diff'] > 0).astype(int)
+data = data.dropna()  # Remove the first row since it will have a NaN value for diff
+
+# Feature engineering
+# Lag features
+data['lag1'] = data['y'].shift(1)
+data['lag2'] = data['y'].shift(2)
+data['lag3'] = data['y'].shift(3)
+
+# Rolling window statistics
+data['rolling_mean_3'] = data['y'].rolling(window=3).mean()
+data['rolling_std_3'] = data['y'].rolling(window=3).std()
+
+# Exponential Moving Average
+data['ema_3'] = data['y'].ewm(span=3, adjust=False).mean()
+
+# Ensure no NA values introduced by new features
 data = data.dropna()
 
-# Define the size of each set
-train_size = int(len(data) * 0.6)
-val_size = int(len(data) * 0.2)
-test_size = len(data) - train_size - val_size
+# Extract features and target
+X = data.drop(['y', 'y_diff', 'y_binary'], axis=1)
+y = data['y_binary']
 
-# Split data into training, validation, and test sets
-train_data = data[:train_size]
-val_data = data[train_size:train_size + val_size]
-test_data = data[train_size + val_size:]
-
-# Extract features and labels for each set
-X_train, y_train = train_data.drop(
-    ['y', 'y_diff', 'y_binary'], axis=1), train_data['y_binary']
-X_val, y_val = val_data.drop(
-    ['y', 'y_diff', 'y_binary'], axis=1), val_data['y_binary']
-X_test, y_test = test_data.drop(
-    ['y', 'y_diff', 'y_binary'], axis=1), test_data['y_binary']
-
-# Standardize features based on the training set only
+# Standardize features
 scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_val = scaler.transform(X_val)
-X_test = scaler.transform(X_test)
+X_scaled = scaler.fit_transform(X)
 
-# Initialize the XGBoost classifier
-model = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+# Save the scaler for later use in testing
+joblib.dump(scaler, "/Users/mchildress/Code/dreamers/Analysis/scaler.pkl")
 
-# Define the hyperparameter grid
+# Initialize the XGBoost classifier with refined parameters
+model = xgb.XGBClassifier(
+    use_label_encoder=False,
+    eval_metric='logloss',
+    reg_lambda=1,  # L2 regularization to reduce overfitting
+    reg_alpha=0.5,  # L1 regularization to further penalize large coefficients
+)
+
+# Define the hyperparameter grid with reduced complexity
 param_distributions = {
-    'max_depth': [3, 5, 7, 10],
-    'learning_rate': [0.01, 0.1, 0.2],
-    'n_estimators': [100, 200, 300],
-    'subsample': [0.5, 0.8, 1]
+    'max_depth': [3, 5, 7],  # Reduced max depth to limit tree size
+    # Lower learning rates for more gradual learning
+    'learning_rate': [0.01, 0.05, 0.1],
+    'n_estimators': [50, 100, 150],  # Fewer estimators to prevent overfitting
+    'subsample': [0.5, 0.7, 0.9],  # Subsampling to introduce stochasticity
 }
 
-# Initialize RandomizedSearchCV
+# Initialize TimeSeriesSplit
+tscv = TimeSeriesSplit(n_splits=5)
+
+# Initialize RandomizedSearchCV with TimeSeriesSplit
 random_search = RandomizedSearchCV(
     estimator=model,
     param_distributions=param_distributions,
-    n_iter=10,
+    n_iter=10,  # Number of parameter settings that are sampled
     scoring='accuracy',
-    cv=3,
+    cv=tscv,
     verbose=1,
     random_state=42)
 
-# Fit the model with early stopping
-random_search.fit(X_train, y_train,
-                  early_stopping_rounds=10,
-                  eval_set=[(X_val, y_val)],
-                  verbose=True)
+# Fit the model
+random_search.fit(X_scaled, y)
 
-# Save the best model and test data
+# Save the best model
 best_model = random_search.best_estimator_
-joblib.dump(best_model, "best_model.pkl")
-test_data = pd.DataFrame(np.column_stack((X_test, y_test)), columns=data.drop(
-    ['y', 'y_diff', 'y_binary'], axis=1).columns.tolist() + ['y_binary'])
-test_data.to_csv('test_data.csv', index=False)
+joblib.dump(best_model, "/Users/mchildress/Code/dreamers/Analysis/best_model.pkl")
 
 # Evaluate training performance
 train_performance = random_search.best_score_
 print("Best Cross-Validation Score from Randomized Search:", train_performance)
-
-# Print the size of each set
-print(f"Training set length: {len(X_train)}")
-print(f"Validation set length: {len(X_val)}")
-print(f"Test set length: {len(X_test)}")
