@@ -1,53 +1,52 @@
+import os
+
 import joblib
 import pandas as pd
-from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
+from sklearn.metrics import (accuracy_score, classification_report, f1_score,
                              precision_score, recall_score)
-from sklearn.preprocessing import StandardScaler
 
-# Load the model and test data
-best_model = joblib.load(
-    "/Users/mchildress/Code/dreamers/Analysis/best_model.pkl")
-test_data = pd.read_csv(
-    "/Users/mchildress/Code/dreamers/Analysis/test_data.csv")
 
-# Ensure that 'y' is present
-if 'y' not in test_data.columns:
-    raise ValueError(
-        "Column 'y' is missing from the test data. Please check the data preparation step in train.py.")
+# Function to load model and scaler
+def load_model_and_scaler(model_path, scaler_path):
+    if os.path.exists(model_path) and os.path.exists(scaler_path):
+        model = joblib.load(model_path)
+        scaler = joblib.load(scaler_path)
+        return model, scaler
+    else:
+        raise FileNotFoundError("Model or Scaler file not found.")
 
-# Replicate feature engineering from train.py
-test_data['y_diff'] = test_data['y'].diff()
-test_data['lag1'] = test_data['y'].shift(1)
-test_data['lag2'] = test_data['y'].shift(2)
-test_data['lag3'] = test_data['y'].shift(3)
-test_data['rolling_mean_3'] = test_data['y'].rolling(window=3).mean()
-test_data['rolling_std_3'] = test_data['y'].rolling(window=3).std()
-test_data['ema_3'] = test_data['y'].ewm(span=3, adjust=False).mean()
 
-# Drop rows with NA values that may have been introduced by shifts or rolling functions
-test_data.dropna(inplace=True)
+# Load the model and scaler
+model_path = "best_model.pkl"
+scaler_path = "scaler.pkl"
+best_model, scaler = load_model_and_scaler(model_path, scaler_path)
 
-# Extract features and target
-X_test = test_data.drop(['y', 'y_diff', 'y_binary'], axis=1)
-y_test = test_data['y_binary']
+# Load the test data
+test_data_path = '/Users/mchildress/Code/dreamers/Analysis/hold_out_data.csv'
+test_data = pd.read_csv(test_data_path)
 
-# Load the scaler from the training phase to ensure consistent scaling
-scaler = joblib.load("/Users/mchildress/Code/dreamers/Analysis/scaler.pkl")
-X_test = scaler.transform(X_test)
+# Preprocess the test data
+X_test = test_data.drop(["y_binary"], axis=1)
+y_test = test_data["y_binary"]
+X_test_scaled = scaler.transform(X_test)
 
-# Predict and evaluate
-y_pred = best_model.predict(X_test)
+# Evaluate the model
+y_pred = best_model.predict(X_test_scaled)
 accuracy = accuracy_score(y_test, y_pred)
 precision = precision_score(y_test, y_pred)
 recall = recall_score(y_test, y_pred)
 f1 = f1_score(y_test, y_pred)
-cm = confusion_matrix(y_test, y_pred)
 
 # Print evaluation metrics
-print('Test Set Evaluation:')
-print(f'Accuracy: {accuracy:.2f}')
-print(f'Precision: {precision:.2f}')
-print(f'Recall: {recall:.2f}')
-print(f'F1 Score: {f1:.2f}')
-print('Confusion Matrix:')
-print(cm)
+evaluation_metrics = {
+    "Accuracy": accuracy,
+    "Precision": precision,
+    "Recall": recall,
+    "F1 score": f1
+}
+print("Test Set Evaluation:")
+for metric_name, value in evaluation_metrics.items():
+    print(f"{metric_name.capitalize()}: {value:.2f}")
+
+# Print classification report
+print(classification_report(y_test, y_pred))
