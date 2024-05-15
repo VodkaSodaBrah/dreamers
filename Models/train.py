@@ -1,17 +1,23 @@
 import os
 import warnings
+from collections import Counter
 
 import joblib
 import numpy as np
 import pandas as pd
-import xgboost as xgb
-from sklearn.model_selection import RandomizedSearchCV, TimeSeriesSplit
+from imblearn.over_sampling import SMOTE
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score, make_scorer
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 
 # Suppress warnings
-warnings.filterwarnings('ignore', category=UserWarning, module='xgboost')
+warnings.filterwarnings('ignore')
 
 # Load and preprocess data
+# Ensure this path is correct
 file_path = '/Users/mchildress/Code/dreamers/synthetic_time_series.csv'
 data = pd.read_csv(file_path)
 data = data.sort_values(by='x')
@@ -39,25 +45,51 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 joblib.dump(scaler, "scaler.pkl")
 
-# Initialize the XGBoost classifier
-model = xgb.XGBClassifier(use_label_encoder=False,
-                          eval_metric='logloss', reg_lambda=1, reg_alpha=0.5)
+# Handle class imbalance using SMOTE
+smote = SMOTE(random_state=42)
+X_resampled, y_resampled = smote.fit_resample(X_scaled, y)
 
-# Define the hyperparameter grid
+# Check the distribution of the classes after resampling
+print(f"Class distribution after resampling: {Counter(y_resampled)}")
+
+# Initialize classifiers
+log_clf = LogisticRegression(max_iter=5000)
+svc_clf = SVC(probability=True)
+rf_clf = RandomForestClassifier()
+
+# Create a voting classifier
+voting_clf = VotingClassifier(estimators=[
+    ('lr', log_clf),
+    ('svc', svc_clf),
+    ('rf', rf_clf)
+], voting='soft')
+
+# Define the hyperparameter grid for the voting classifier
 param_distributions = {
-    'n_estimators': [100, 200, 300],
-    'learning_rate': [0.01, 0.1, 0.2],
-    'max_depth': [3, 5, 7],
-    'subsample': [0.7, 0.8, 0.9],
-    'colsample_bytree': [0.7, 0.8, 0.9],
-    'gamma': [0, 0.1, 0.2]
+    'lr__C': [0.01, 0.1, 1, 10, 100],
+    'svc__C': [0.01, 0.1, 1, 10, 100],
+    'svc__kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+    'svc__gamma': ['scale', 'auto'],
+    'rf__n_estimators': [100, 200, 300],
+    'rf__max_depth': [None, 10, 20, 30],
+    'rf__min_samples_split': [2, 5, 10],
+    'rf__min_samples_leaf': [1, 2, 4]
 }
 
+# Define custom scoring function
+
+
+def custom_f1_score(y_true, y_pred):
+    return f1_score(y_true, y_pred, average='binary')
+
+
+scorer = make_scorer(custom_f1_score, greater_is_better=True)
+
 # Cross-validation
-tscv = TimeSeriesSplit(n_splits=5)
+skf = StratifiedKFold(n_splits=5)
 random_search = RandomizedSearchCV(
-    model, param_distributions, n_iter=10, scoring='accuracy', n_jobs=-1, cv=tscv, verbose=1)
-random_search.fit(X_scaled, y)
+    voting_clf, param_distributions, n_iter=20, scoring=scorer, n_jobs=-1, cv=skf, verbose=1)
+random_search.fit(X_resampled, y_resampled)
 
 # Save the best model
 best_model = random_search.best_estimator_
