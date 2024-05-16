@@ -1,56 +1,83 @@
-# Time Series Analysis and Prediction with XGBoost
+# Time Series Analysis and Prediction with Machine Learning
 
-This repository contains code for analyzing and predicting time series data using the XGBoost machine learning framework. The project involves preprocessing time series data, creating lagged features, binary transformation, model training, and evaluation.
+This repository contains code for analyzing and predicting time series data using machine learning models. The project involves preprocessing time series data, creating lagged features, binary transformation, model training, evaluation, and logging results.
 
 ## Project Structure
 
-- `train.py & test.py`: Main Python scripts with all the analysis and model training.
+- `train.py`: Script for training models using classical machine learning algorithms.
+- `test.py`: Script for testing models trained using `train.py`.
+- `train_tensorflow.py`: Script for training models using TensorFlow on GPU.
+- `test_tensorflow.py`: Script for testing models trained using `train_tensorflow.py`.
+- `log_results.py`: Script to run training and testing scripts and log the results.
 - `synthetic_time_series.csv`: Sample dataset used for the analysis.
 - `/Analysis`: Directory where trained models are saved.
-- `/Analysis`: Directory for saved plots and data visualizations.
+- `/Logs`: Directory where log files with training and testing results are saved.
 
 ## Getting Started
 
 ### Prerequisites
 
+```
 Ensure you have the following installed:
 
-- Python 3.12.3
-- Pandas, NumPy, Matplotlib, XGBoost, scikit-learn, lime, shap, joblib
+- Python 3.10.14 or 3.11
+- Pandas, NumPy, Matplotlib, scikit-learn, joblib, imbalanced-learn, TensorFlow, and other required libraries.
 
 You can install these packages using `pip`:
 
-```bash
-pip3 install pandas numpy matplotlib xgboost scikit-learn lime shap
-
+pip3 install pandas numpy matplotlib scikit-learn joblib imbalanced-learn tensorflow
 Installation
-
-1. Clone the repository:
-    git clone https://github.com/VodkaSodaBrah/dreamers.git
-2. Navigate to the cloned directory:
-    cd dreamers
+Clone the repository:
+bash
+Copy code
+git clone https://github.com/VodkaSodaBrah/dreamers.git
+Navigate to the cloned directory:
+bash
+Copy code
+cd dreamers
 
 Usage
 
-Run the main script:
-    python3 train.py
-        ensure the path to the sample dataset is set correctly
+Training and Testing with Classical Machine Learning
+
+Run the training script:
+
+python3 train.py
+Ensure the path to the sample dataset is set correctly.
+
+Run the testing script:
+
+python3 test.py
+Training and Testing with TensorFlow
+Run the TensorFlow training script:
+
+python3 train_tensorflow.py
+Ensure the path to the sample dataset is set correctly.
+
+Run the TensorFlow testing script:
+
+python3 test_tensorflow.py
+Logging Results
+To run the training and testing scripts and log the results:
+
+python3 log_results.py
+This will run train.py, test.py, train_tensorflow.py, and test_tensorflow.py and log the outputs in the /Logs directory, organized by date and time.
 
 Features
+
 Data Preprocessing: Includes standardization, lag features creation, and binary transformation based on median values.
-Model Training: Uses XGBoost for training a classifier with hyperparameter tuning through random search.
-Model Evaluation: Evaluates model performance using accuracy, precision, recall, and F1 score.
+Model Training: Uses classical machine learning algorithms and TensorFlow for training classifiers with hyperparameter tuning.
+Model Evaluation: Evaluates model performance using accuracy, precision, recall, F1 score, and ROC-AUC.
 Data Visualization: Generates plots for original data and prediction results.
-Explainability: Implements SHAP and LIME for model interpretation.
+Logging: Logs training and testing results for tracking progress over time.
 Contributing
-Contributions, issues, and feature requests are welcome. Feel free to check issues page if you want to contribute.
+Contributions, issues, and feature requests are welcome. Feel free to check the issues page if you want to contribute.
 
 License
 Distributed under the MIT License. See LICENSE for more information.
 
 Contact
-Michael Childress --- mchildress@me.com
+Michael Childress - mchildress@me.com
 
-Project Link: https://https://github.com/VodkaSodaBrah/dreamers
-
+Project Link: https://github.com/VodkaSodaBrah/dreamers
 ```

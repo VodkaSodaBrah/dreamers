@@ -9,6 +9,7 @@ from imblearn.over_sampling import SMOTE
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from tensorflow.keras import regularizers
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Dense, Dropout, Input
 from tensorflow.keras.models import Sequential
@@ -16,7 +17,14 @@ from tensorflow.keras.models import Sequential
 print("Starting script...")
 
 # Ensure TensorFlow uses the GPU
-print("Devices: ", tf.config.list_physical_devices('GPU'))
+physical_devices = tf.config.list_physical_devices('GPU')
+print("Devices: ", physical_devices)
+
+if physical_devices:
+    try:
+        tf.config.experimental.set_memory_growth(physical_devices[0], True)
+    except:
+        pass
 
 # Load and preprocess data
 # Ensure this path is correct
@@ -59,15 +67,15 @@ print("Splitting data...")
 X_train, X_val, y_train, y_val = train_test_split(
     X_resampled, y_resampled, test_size=0.2, random_state=42)
 
-# Define the model creation function
+# Define the model creation function with regularization
 
 
-def create_model(optimizer='adam', dropout_rate=0.5):
+def create_model(optimizer='adam', dropout_rate=0.5, l2_reg=0.01):
     model = Sequential([
         Input(shape=(X_train.shape[1],)),
-        Dense(64, activation='relu'),
+        Dense(16, activation='relu', kernel_regularizer=regularizers.l2(l2_reg)),
         Dropout(dropout_rate),
-        Dense(32, activation='relu'),
+        Dense(8, activation='relu', kernel_regularizer=regularizers.l2(l2_reg)),
         Dropout(dropout_rate),
         Dense(1, activation='sigmoid')
     ])
@@ -78,57 +86,36 @@ def create_model(optimizer='adam', dropout_rate=0.5):
 
 print("Creating model...")
 
-# Define hyperparameters to manually search
-batch_sizes = [16, 32, 64]
-epochs = [50, 100]
-optimizers = ['adam', 'rmsprop']
-dropout_rates = [0.3, 0.5, 0.7]
+# Simplified model training
+batch_size = 16
+epochs = 50
+optimizer = 'adam'
+dropout_rate = 0.3
+l2_reg = 0.001
 
-best_auc = 0
-best_params = {}
+print(
+    f"Training with batch_size={batch_size}, epochs={epochs}, optimizer={optimizer}, dropout_rate={dropout_rate}, l2_reg={l2_reg}")
 
-print("Starting manual grid search...")
+# Create and compile the model
+model = create_model(optimizer=optimizer,
+                     dropout_rate=dropout_rate, l2_reg=l2_reg)
 
-# Manual grid search
-for batch_size in batch_sizes:
-    for epoch in epochs:
-        for optimizer in optimizers:
-            for dropout_rate in dropout_rates:
+# Define early stopping
+early_stopping = EarlyStopping(
+    monitor='val_loss', patience=10, restore_best_weights=True)
 
-                # Create and compile the model
-                model = create_model(optimizer=optimizer,
-                                     dropout_rate=dropout_rate)
+# Train the model
+history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size,
+                    validation_data=(X_val, y_val), callbacks=[early_stopping], verbose=1)
 
-                # Define early stopping
-                early_stopping = EarlyStopping(
-                    monitor='val_loss', patience=10, restore_best_weights=True)
+# Evaluate the model on the validation set
+val_pred_prob = model.predict(X_val, batch_size=batch_size)
+val_auc = roc_auc_score(y_val, val_pred_prob)
 
-                # Train the model
-                history = model.fit(X_train, y_train, epochs=epoch, batch_size=batch_size, validation_data=(
-                    X_val, y_val), callbacks=[early_stopping])
-
-                # Evaluate the model on the validation set
-                val_pred_prob = model.predict(X_val, batch_size=batch_size)
-                val_auc = roc_auc_score(y_val, val_pred_prob)
-
-                print(f"Validation ROC-AUC: {val_auc}")
-
-                # Update best model and parameters if current model is better
-                if val_auc > best_auc:
-                    best_auc = val_auc
-                    best_params = {
-                        'batch_size': batch_size,
-                        'epochs': epoch,
-                        'optimizer': optimizer,
-                        'dropout_rate': dropout_rate
-                    }
-                    best_model = model
-
-print(f"Best Validation ROC-AUC: {best_auc}")
-print(f"Best Hyperparameters: {best_params}")
+print(f"Validation ROC-AUC: {val_auc}")
 
 # Save the best model and scaler
-best_model.save('best_model.keras')  # Save in the recommended .keras format
+model.save('best_model.keras')  # Save in the recommended .keras format
 joblib.dump(scaler, "scaler.pkl")
 
 print("Script completed.")
