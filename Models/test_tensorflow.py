@@ -1,84 +1,58 @@
-import os
-
 import joblib
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from sklearn.metrics import (accuracy_score, classification_report, f1_score,
-                             precision_score, recall_score, roc_auc_score)
+from sklearn.metrics import (accuracy_score, f1_score, precision_score,
+                             recall_score, roc_auc_score)
 from sklearn.preprocessing import StandardScaler
 
+# Load and preprocess test data
+file_path = '/Users/mchildress/Code/dreamers/synthetic_time_series.csv'
+data = pd.read_csv(file_path)
+data = data.sort_values(by='x')
 
-# Function to load model and scaler
-def load_model_and_scaler(model_path, scaler_path):
-    if os.path.exists(model_path) and os.path.exists(scaler_path):
-        model = tf.keras.models.load_model(model_path)
-        scaler = joblib.load(scaler_path)
-        return model, scaler
-    else:
-        raise FileNotFoundError("Model or Scaler file not found.")
+# Calculate the change from the previous step
+data['y_diff'] = data['y'].diff()
+data['y_binary'] = (data['y_diff'] > 0).astype(int)
+data = data.dropna()
 
+# Feature engineering
+data['lag1'] = data['y'].shift(1)
+data['lag2'] = data['y'].shift(2)
+data['lag3'] = data['y'].shift(3)
+data['rolling_mean_3'] = data['y'].rolling(window=3).mean()
+data['rolling_std_3'] = data['y'].rolling(window=3).std()
+data['ema_3'] = data['y'].ewm(span=3, adjust=False).mean()
+data = data.dropna()
 
-# Load the model and scaler
-model_path = "/Users/mchildress/Code/dreamers/Models/best_model.keras"
-scaler_path = "/Users/mchildress/Code/dreamers/Models/scaler.pkl"
-best_model, scaler = load_model_and_scaler(model_path, scaler_path)
+# Extract features and target
+X = data.drop(['y', 'y_diff', 'y_binary'], axis=1)
+y = data['y_binary']
 
-# Load the test data
-test_data_path = '/Users/mchildress/Code/dreamers/Analysis/hold_out_data.csv'
-test_data = pd.read_csv(test_data_path)
+# Standardize features using the previously saved scaler
+scaler = joblib.load("scaler.pkl")
+X_scaled = scaler.transform(X)
 
-# Preprocess the test data
-X_test = test_data.drop(["y_binary"], axis=1)
-y_test = test_data["y_binary"]
-X_test_scaled = scaler.transform(X_test)
+# Load the best model
+model = tf.keras.models.load_model('best_model.keras')
+
+# Predict probabilities
+probabilities = model.predict(X_scaled)
+
+# Adjust threshold for predictions
+threshold = 0.6
+predictions = (probabilities >= threshold).astype(int)
 
 # Evaluate the model
-y_prob = best_model.predict(X_test_scaled)
-y_pred = (y_prob >= 0.5).astype(int)
+accuracy = accuracy_score(y, predictions)
+precision = precision_score(y, predictions)
+recall = recall_score(y, predictions)
+f1 = f1_score(y, predictions)
+roc_auc = roc_auc_score(y, probabilities)
 
-accuracy = accuracy_score(y_test, y_pred)
-precision = precision_score(y_test, y_pred, zero_division=1)
-recall = recall_score(y_test, y_pred, zero_division=1)
-f1 = f1_score(y_test, y_pred, zero_division=1)
-roc_auc = roc_auc_score(y_test, y_prob)
-
-# Print evaluation metrics
-evaluation_metrics = {
-    "Accuracy": accuracy,
-    "Precision": precision,
-    "Recall": recall,
-    "F1 score": f1,
-    "ROC-AUC": roc_auc
-}
-print("Test Set Evaluation:")
-for metric_name, value in evaluation_metrics.items():
-    print(f"{metric_name.capitalize()}: {value:.2f}")
-
-# Print classification report
-print(classification_report(y_test, y_pred, zero_division=1))
-
-# Evaluate the model with different decision thresholds
-thresholds = [0.2, 0.3, 0.4, 0.5, 0.6]  # Example thresholds
-for threshold in thresholds:
-    y_pred_adjusted = (y_prob >= threshold).astype(int)
-
-    accuracy_adjusted = accuracy_score(y_test, y_pred_adjusted)
-    precision_adjusted = precision_score(
-        y_test, y_pred_adjusted, zero_division=1)
-    recall_adjusted = recall_score(y_test, y_pred_adjusted, zero_division=1)
-    f1_adjusted = f1_score(y_test, y_pred_adjusted, zero_division=1)
-
-    # Print evaluation metrics with adjusted threshold
-    print(f"Test Set Evaluation with Threshold = {threshold}:")
-    evaluation_metrics_adjusted = {
-        "Accuracy": accuracy_adjusted,
-        "Precision": precision_adjusted,
-        "Recall": recall_adjusted,
-        "F1 score": f1_adjusted
-    }
-    for metric_name, value in evaluation_metrics_adjusted.items():
-        print(f"{metric_name.capitalize()}: {value:.2f}")
-
-    # Print classification report with adjusted threshold
-    print(classification_report(y_test, y_pred_adjusted, zero_division=1))
+print(f"Test Set Evaluation with Threshold = {threshold}:")
+print(f"Accuracy: {accuracy:.2f}")
+print(f"Precision: {precision:.2f}")
+print(f"Recall: {recall:.2f}")
+print(f"F1 score: {f1:.2f}")
+print(f"ROC-AUC: {roc_auc:.2f}")
