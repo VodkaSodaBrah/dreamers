@@ -6,8 +6,10 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from imblearn.over_sampling import SMOTE
+from scikeras.wrappers import KerasClassifier
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import (GridSearchCV, StratifiedKFold,
+                                     train_test_split)
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras import regularizers
 from tensorflow.keras.callbacks import EarlyStopping
@@ -27,7 +29,6 @@ if physical_devices:
         pass
 
 # Load and preprocess data
-# Ensure this path is correct
 file_path = '/Users/mchildress/Code/dreamers/synthetic_time_series.csv'
 data = pd.read_csv(file_path)
 data = data.sort_values(by='x')
@@ -86,36 +87,32 @@ def create_model(optimizer='adam', dropout_rate=0.5, l2_reg=0.01):
 
 print("Creating model...")
 
-# Simplified model training
-batch_size = 16
-epochs = 50
-optimizer = 'adam'
-dropout_rate = 0.3
-l2_reg = 0.001
+# Define parameter grid
+param_grid = {
+    'model__optimizer': ['adam', 'rmsprop'],
+    'model__dropout_rate': [0.3, 0.5],
+    'model__l2_reg': [0.001, 0.01]
+}
 
-print(
-    f"Training with batch_size={batch_size}, epochs={epochs}, optimizer={optimizer}, dropout_rate={dropout_rate}, l2_reg={l2_reg}")
+# Wrap the Keras model with KerasClassifier for use in GridSearchCV
+model = KerasClassifier(
+    model=create_model, batch_size=16, epochs=50, verbose=1)
 
-# Create and compile the model
-model = create_model(optimizer=optimizer,
-                     dropout_rate=dropout_rate, l2_reg=l2_reg)
+# Perform grid search
+grid = GridSearchCV(estimator=model, param_grid=param_grid,
+                    cv=StratifiedKFold(n_splits=3))
+grid_result = grid.fit(X_train, y_train)
 
-# Define early stopping
-early_stopping = EarlyStopping(
-    monitor='val_loss', patience=10, restore_best_weights=True)
-
-# Train the model
-history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size,
-                    validation_data=(X_val, y_val), callbacks=[early_stopping], verbose=1)
+# Output the best hyperparameters
+print(f"Best Hyperparameters: {grid_result.best_params_}")
 
 # Evaluate the model on the validation set
-val_pred_prob = model.predict(X_val, batch_size=batch_size)
+val_pred_prob = grid_result.predict_proba(X_val)[:, 1]
 val_auc = roc_auc_score(y_val, val_pred_prob)
-
 print(f"Validation ROC-AUC: {val_auc}")
 
 # Save the best model and scaler
-model.save('best_model.keras')  # Save in the recommended .keras format
+grid_result.best_estimator_.model_.save('best_model.keras')
 joblib.dump(scaler, "scaler.pkl")
 
 print("Script completed.")

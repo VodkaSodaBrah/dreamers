@@ -1,0 +1,130 @@
+Running command: python3 /Users/mchildress/Code/dreamers/Models/train.py
+==================================================
+Class distribution after resampling: Counter({1: 10083, 0: 10083})
+
+Fitting 5 folds for each of 20 candidates, totalling 100 fits
+
+Best Cross-Validation Score from Randomized Search: 0.9888100388343005
+Running command: python3 /Users/mchildress/Code/dreamers/Models/test.py
+==================================================
+         1.0       1.00      0.17      0.29      2010
+
+
+
+    accuracy                           0.58      4000
+
+   macro avg       0.77      0.59      0.50      4000
+
+weighted avg       0.77      0.58      0.50      4000
+
+
+
+Test Set Evaluation with Threshold = 0.6:
+
+Accuracy: 0.52
+
+Precision: 1.00
+
+Recall: 0.04
+
+F1 score: 0.07
+
+              precision    recall  f1-score   support
+
+
+
+         0.0       0.51      1.00      0.67      1990
+
+         1.0       1.00      0.04      0.07      2010
+
+
+
+    accuracy                           0.52      4000
+
+   macro avg       0.75      0.52      0.37      4000
+
+weighted avg       0.75      0.52      0.37      4000
+
+
+Running command: python3 /Users/mchildress/Code/dreamers/Models/train_tensorflow.py
+==================================================
+[1m1002/1009[0m [32m━━━━━━━━━━━━━━━━━━━[0m[37m━[0m [1m0s[0m 9ms/step - accuracy: 0.9299 - loss: 0.2524
+
+[1m1008/1009[0m [32m━━━━━━━━━━━━━━━━━━━[0m[37m━[0m [1m0s[0m 9ms/step - accuracy: 0.9298 - loss: 0.2524
+
+[1m1009/1009[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m9s[0m 9ms/step - accuracy: 0.9298 - loss: 0.2524
+
+Best Hyperparameters: {'dropout_rate': 0.3, 'l2_reg': 0.01, 'optimizer': 'adam'}
+
+
+
+[1m  1/253[0m [37m━━━━━━━━━━━━━━━━━━━━[0m [1m10s[0m 43ms/step
+
+[1m 52/253[0m [32m━━━━[0m[37m━━━━━━━━━━━━━━━━[0m [1m0s[0m 983us/step
+
+[1m106/253[0m [32m━━━━━━━━[0m[37m━━━━━━━━━━━━[0m [1m0s[0m 956us/step
+
+[1m161/253[0m [32m━━━━━━━━━━━━[0m[37m━━━━━━━━[0m [1m0s[0m 942us/step
+
+[1m212/253[0m [32m━━━━━━━━━━━━━━━━[0m[37m━━━━[0m [1m0s[0m 953us/step
+
+[1m253/253[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 1ms/step  
+
+[1m253/253[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 1ms/step
+
+Validation ROC-AUC: 0.9947737191470116
+
+Script completed.
+
+2024-05-16 11:58:07.029812: I metal_plugin/src/device/metal_device.cc:1154] Metal device set to: Apple M1 Max
+
+2024-05-16 11:58:07.029830: I metal_plugin/src/device/metal_device.cc:296] systemMemory: 64.00 GB
+
+2024-05-16 11:58:07.029835: I metal_plugin/src/device/metal_device.cc:313] maxCacheSize: 24.00 GB
+
+2024-05-16 11:58:07.029854: I tensorflow/core/common_runtime/pluggable_device/pluggable_device_factory.cc:305] Could not identify NUMA node of platform GPU ID 0, defaulting to 0. Your kernel may not have been built with NUMA support.
+
+2024-05-16 11:58:07.029865: I tensorflow/core/common_runtime/pluggable_device/pluggable_device_factory.cc:271] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 0 MB memory) -> physical PluggableDevice (device: 0, name: METAL, pci bus id: <undefined>)
+
+2024-05-16 11:58:07.438497: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:117] Plugin optimizer for device_type GPU is enabled.
+Running command: python3 /Users/mchildress/Code/dreamers/Models/test_tensorflow.py
+==================================================
+Test Set Evaluation with Threshold = 0.6:
+
+Accuracy: 0.50
+
+Precision: 1.00
+
+Recall: 0.00
+
+F1 score: 0.00
+
+              precision    recall  f1-score   support
+
+
+
+         0.0       0.50      1.00      0.66      1990
+
+         1.0       1.00      0.00      0.00      2010
+
+
+
+    accuracy                           0.50      4000
+
+   macro avg       0.75      0.50      0.33      4000
+
+weighted avg       0.75      0.50      0.33      4000
+
+
+
+2024-05-16 13:53:24.536230: I metal_plugin/src/device/metal_device.cc:1154] Metal device set to: Apple M1 Max
+
+2024-05-16 13:53:24.536249: I metal_plugin/src/device/metal_device.cc:296] systemMemory: 64.00 GB
+
+2024-05-16 13:53:24.536253: I metal_plugin/src/device/metal_device.cc:313] maxCacheSize: 24.00 GB
+
+2024-05-16 13:53:24.536269: I tensorflow/core/common_runtime/pluggable_device/pluggable_device_factory.cc:305] Could not identify NUMA node of platform GPU ID 0, defaulting to 0. Your kernel may not have been built with NUMA support.
+
+2024-05-16 13:53:24.536280: I tensorflow/core/common_runtime/pluggable_device/pluggable_device_factory.cc:271] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 0 MB memory) -> physical PluggableDevice (device: 0, name: METAL, pci bus id: <undefined>)
+
+2024-05-16 13:53:24.748868: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:117] Plugin optimizer for device_type GPU is enabled.
