@@ -21,8 +21,9 @@ model_path = "/Users/mchildress/Code/dreamers/Models/best_model.pkl"
 scaler_path = "/Users/mchildress/Code/dreamers/Models/scaler.pkl"
 best_model, scaler = load_model_and_scaler(model_path, scaler_path)
 
+# Load the test data from a CSV file and store it in 'test_data'
+test_data_path = "/Users/mchildress/Code/dreamers/Data/test.csv"
 # Load the test data
-# Ensure this path is correct
 test_data_path = '/Users/mchildress/Code/dreamers/Analysis/hold_out_data.csv'
 test_data = pd.read_csv(test_data_path)
 
