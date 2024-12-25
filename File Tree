@@ -1,0 +1,44 @@
+┣ 📂Analysis
+┃ ┣ 📂logs
+┃ ┃ ┣ 📜log_2024-05-15_14-01-45.txt
+┃ ┃ ┣ 📜log_2024-05-15_14-05-16.txt
+┃ ┃ ┣ 📜log_2024-05-15_15-27-59.txt
+┃ ┃ ┣ 📜log_2024-05-15_20-09-36.txt
+┃ ┃ ┣ 📜log_2024-05-15_20-17-33.txt
+┃ ┃ ┣ 📜log_2024-05-15_20-38-31.txt
+┃ ┃ ┣ 📜log_2024-05-16_05-53-23.txt
+┃ ┃ ┣ 📜log_2024-05-16_11-53-49.txt
+┃ ┃ ┣ 📜log_2024-05-16_18-39-34.txt
+┃ ┃ ┣ 📜log_2024-05-20_08-36-51.txt
+┃ ┃ ┣ 📜log_2024-05-20_08-37-22.txt
+┃ ┃ ┣ 📜log_2024-05-20_19-07-10.txt
+┃ ┃ ┣ 📜test_roc.png
+┃ ┃ ┗ 📜train_val_curves.png
+┃ ┣ 📜best_model.json
+┃ ┣ 📜hold_out_data.csv
+┃ ┣ 📜lime_explanation.png
+┃ ┣ 📜log_results.py
+┃ ┣ 📜original_data_plot.png
+┃ ┣ 📜shap_summary_plot.png
+┃ ┗ 📜test_data.csv
+┣ 📂data
+┃ ┣ 📜scaler.pkl
+┃ ┗ 📜synthetic_time_series.csv
+┣ 📂docker
+┃ ┗ 📜Dockerfile
+┣ 📂scripts
+┃ ┣ 📜.DS_Store
+┃ ┣ 📜best_model.pth
+┃ ┣ 📜create_scaler.py
+┃ ┣ 📜scaler.pkl
+┃ ┣ 📜serve_model.py
+┃ ┣ 📜test_pytorch.py
+┃ ┗ 📜train_pytorch.py
+┣ 📂test
+┃ ┣ 📜generate_test_data.py
+┃ ┗ 📜test_data_1000.json
+┣ 📜.DS_Store
+┣ 📜.gitignore
+┣ 📜environment.yml
+┣ 📜README.md
+┗ 📜requirements.txt
