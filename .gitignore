@@ -3,3 +3,5 @@
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+scripts/best_model.pth
+scripts/best_model_checkpoint.pth
