@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 import matplotlib
-matplotlib.use('Agg')  # Non-interactive backend for saving plots
+matplotlib.use('Agg')  
 import matplotlib.pyplot as plt
 
 import torch
@@ -16,17 +16,17 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, Dataset
 
-import joblib  # For saving/loading study/model/scaler
+import joblib  
 
 print("Starting script...")
 
 # ------------------------------------------------------------------------------
 # 1) Global Settings
 # ------------------------------------------------------------------------------
-MAX_EPOCHS_PER_TRIAL = 15     # Number of epochs for each Optuna trial
-PATIENCE = 3                  # Early stopping patience (within each trial)
-MAX_FINAL_EPOCHS = 50         # Number of epochs for final re-training (with early stopping)
-BATCH_SIZE = 16               # Could also be a hyperparam if desired
+MAX_EPOCHS_PER_TRIAL = 15     
+PATIENCE = 3                  
+MAX_FINAL_EPOCHS = 50         
+BATCH_SIZE = 16              
 
 # 2) Device setup
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
@@ -97,7 +97,7 @@ X_train_scaled = X_train_scaled.astype(np.float32)
 X_val_scaled   = X_val_scaled.astype(np.float32)
 X_test_scaled  = X_test_scaled.astype(np.float32)
 
-# Also convert labels to float32 if you're passing them as floats
+# Convert labels to float32 if you're passing them as floats
 y_train = y_train.astype(np.float32)
 y_val   = y_val.astype(np.float32)
 y_test  = y_test.astype(np.float32)
@@ -268,7 +268,7 @@ def objective(trial):
 import optuna
 
 study = optuna.create_study(direction="maximize")
-study.optimize(objective, n_trials=200)  # Large search for overnight
+study.optimize(objective, n_trials=200)
 
 print("\nStudy complete!")
 print(f"Best trial: {study.best_trial.number}")
@@ -309,7 +309,7 @@ optimizer = optim.Adam(final_model.parameters(), lr=lr, weight_decay=1e-4)
 
 best_val_auc_final = 0.0
 epochs_no_improve_final = 0
-patience_final = 5  # Early stopping patience for final training
+patience_final = 5  
 
 for epoch in range(MAX_FINAL_EPOCHS):
     # --- Training ---
